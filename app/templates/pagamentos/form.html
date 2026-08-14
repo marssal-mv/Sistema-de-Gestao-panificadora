@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Novo pagamento{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Novo pagamento</h1>
+
+    {% if erro %}
+        <div class="alert alert-danger">{{ erro }}</div>
+    {% endif %}
+
+    <form method="post" action="/pagamentos" class="col-md-6">
+        <div class="mb-3">
+            <label for="funcionario_id" class="form-label">Funcionário</label>
+            <select name="funcionario_id" id="funcionario_id" class="form-select" required>
+                <option value="" disabled {% if not valores.funcionario_id %}selected{% endif %}>Selecione...</option>
+                {% for funcionario in funcionarios %}
+                <option
+                    value="{{ funcionario.id }}"
+                    {% if valores.funcionario_id == funcionario.id %}selected{% endif %}
+                >
+                    {{ funcionario.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="forma_pagamento_id" class="form-label">Forma de pagamento</label>
+            <select name="forma_pagamento_id" id="forma_pagamento_id" class="form-select" required>
+                <option value="" disabled {% if not valores.forma_pagamento_id %}selected{% endif %}>Selecione...</option>
+                {% for forma in formas_pagamento %}
+                <option
+                    value="{{ forma.id }}"
+                    {% if valores.forma_pagamento_id == forma.id %}selected{% endif %}
+                >
+                    {{ forma.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="valor" class="form-label">Valor (R$)</label>
+            <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                id="valor"
+                name="valor"
+                value="{{ valores.valor or '' }}"
+                required
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="data" class="form-label">Data</label>
+            <input
+                type="date"
+                class="form-control"
+                id="data"
+                name="data"
+                value="{{ valores.data or '' }}"
+                required
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="observacao" class="form-label">Observação (opcional)</label>
+            <textarea class="form-control" id="observacao" name="observacao" rows="2">{{ valores.observacao or "" }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="/pagamentos" class="btn btn-link">Cancelar</a>
+    </form>
+{% endblock %}
