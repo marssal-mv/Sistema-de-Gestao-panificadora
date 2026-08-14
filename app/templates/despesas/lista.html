@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Despesas{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Despesas</h1>
+        <a href="/despesas/novo" class="btn btn-primary">Nova despesa</a>
+    </div>
+
+    <form method="get" action="/despesas" class="row g-2 mb-4 align-items-end">
+        <div class="col-auto">
+            <label for="data_inicio" class="form-label">De</label>
+            <input type="date" name="data_inicio" id="data_inicio" class="form-control" value="{{ filtro_data_inicio }}">
+        </div>
+        <div class="col-auto">
+            <label for="data_fim" class="form-label">Até</label>
+            <input type="date" name="data_fim" id="data_fim" class="form-control" value="{{ filtro_data_fim }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-secondary">Filtrar</button>
+            <a href="/despesas" class="btn btn-link">Limpar</a>
+        </div>
+    </form>
+
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Descrição</th>
+                <th>Fornecedor</th>
+                <th>Categoria</th>
+                <th>Forma</th>
+                <th class="text-end">Valor</th>
+                <th>Observação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for despesa in despesas %}
+            <tr>
+                <td>{{ despesa.data.strftime("%d/%m/%Y") }}</td>
+                <td>{{ despesa.descricao }}</td>
+                <td>{{ despesa.fornecedor or "" }}</td>
+                <td>{{ despesa.categoria or "" }}</td>
+                <td>{{ despesa.forma_pagamento.nome }}</td>
+                <td class="text-end">R$ {{ "%.2f"|format(despesa.valor) }}</td>
+                <td>{{ despesa.observacao or "" }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-muted">Nenhuma despesa encontrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

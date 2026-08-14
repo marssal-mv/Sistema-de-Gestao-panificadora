@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Nova despesa{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Nova despesa</h1>
+
+    {% if erro %}
+        <div class="alert alert-danger">{{ erro }}</div>
+    {% endif %}
+
+    <form method="post" action="/despesas" class="col-md-6">
+        <div class="mb-3">
+            <label for="descricao" class="form-label">Descrição</label>
+            <input
+                type="text"
+                class="form-control"
+                id="descricao"
+                name="descricao"
+                value="{{ valores.descricao or '' }}"
+                required
+                autofocus
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="fornecedor" class="form-label">Fornecedor (opcional)</label>
+            <input
+                type="text"
+                class="form-control"
+                id="fornecedor"
+                name="fornecedor"
+                value="{{ valores.fornecedor or '' }}"
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="categoria" class="form-label">Categoria (opcional)</label>
+            <input
+                type="text"
+                class="form-control"
+                id="categoria"
+                name="categoria"
+                value="{{ valores.categoria or '' }}"
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="forma_pagamento_id" class="form-label">Forma de pagamento</label>
+            <select name="forma_pagamento_id" id="forma_pagamento_id" class="form-select" required>
+                <option value="" disabled {% if not valores.forma_pagamento_id %}selected{% endif %}>Selecione...</option>
+                {% for forma in formas_pagamento %}
+                <option
+                    value="{{ forma.id }}"
+                    {% if valores.forma_pagamento_id == forma.id %}selected{% endif %}
+                >
+                    {{ forma.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="valor" class="form-label">Valor (R$)</label>
+            <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                class="form-control"
+                id="valor"
+                name="valor"
+                value="{{ valores.valor or '' }}"
+                required
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="data" class="form-label">Data</label>
+            <input
+                type="date"
+                class="form-control"
+                id="data"
+                name="data"
+                value="{{ valores.data or '' }}"
+                required
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="observacao" class="form-label">Observação (opcional)</label>
+            <textarea class="form-control" id="observacao" name="observacao" rows="2">{{ valores.observacao or "" }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="/despesas" class="btn btn-link">Cancelar</a>
+    </form>
+{% endblock %}
