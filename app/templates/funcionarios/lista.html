@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Funcionários{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Funcionários</h1>
+        <a href="/funcionarios/novo" class="btn btn-primary">Novo funcionário</a>
+    </div>
+
+    <p>
+        {% if mostrar_inativos %}
+            <a href="/funcionarios">Mostrar só ativos</a>
+        {% else %}
+            <a href="/funcionarios?mostrar_inativos=true">Mostrar inativos também</a>
+        {% endif %}
+    </p>
+
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Status</th>
+                <th class="text-end">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for funcionario in funcionarios %}
+            <tr>
+                <td>{{ funcionario.nome }}</td>
+                <td>
+                    {% if funcionario.ativo %}
+                        <span class="badge text-bg-success">Ativo</span>
+                    {% else %}
+                        <span class="badge text-bg-secondary">Inativo</span>
+                    {% endif %}
+                </td>
+                <td class="text-end">
+                    <a href="/funcionarios/{{ funcionario.id }}/editar" class="btn btn-sm btn-outline-secondary">Editar</a>
+                    {% if funcionario.ativo %}
+                        <form action="/funcionarios/{{ funcionario.id }}/inativar" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Inativar</button>
+                        </form>
+                    {% else %}
+                        <form action="/funcionarios/{{ funcionario.id }}/ativar" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-success">Reativar</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="3" class="text-muted">Nenhum funcionário cadastrado ainda.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}{% if funcionario %}Editar funcionário{% else %}Novo funcionário{% endif %}{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">{% if funcionario %}Editar funcionário{% else %}Novo funcionário{% endif %}</h1>
+
+    {% if erro %}
+        <div class="alert alert-danger">{{ erro }}</div>
+    {% endif %}
+
+    <form
+        method="post"
+        action="{% if funcionario %}/funcionarios/{{ funcionario.id }}/editar{% else %}/funcionarios{% endif %}"
+        class="col-md-6"
+    >
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome</label>
+            <input
+                type="text"
+                class="form-control"
+                id="nome"
+                name="nome"
+                value="{{ funcionario.nome if funcionario else '' }}"
+                required
+                autofocus
+            >
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="/funcionarios" class="btn btn-link">Cancelar</a>
+    </form>
+{% endblock %}

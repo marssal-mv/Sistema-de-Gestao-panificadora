@@ -1,0 +1,94 @@
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
+from fastapi.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.models import Funcionario
+
+router = APIRouter(prefix="/funcionarios", tags=["funcionarios"])
+templates = Jinja2Templates(directory="app/templates")
+
+
+@router.get("")
+def listar(request: Request, mostrar_inativos: bool = False, db: Session = Depends(get_db)):
+    query = select(Funcionario).order_by(Funcionario.nome)
+    if not mostrar_inativos:
+        query = query.where(Funcionario.ativo.is_(True))
+    funcionarios = db.scalars(query).all()
+    return templates.TemplateResponse(
+        request,
+        "funcionarios/lista.html",
+        {"funcionarios": funcionarios, "mostrar_inativos": mostrar_inativos},
+    )
+
+
+@router.get("/novo")
+def form_novo(request: Request):
+    return templates.TemplateResponse(request, "funcionarios/form.html", {"funcionario": None})
+
+
+@router.post("")
+def criar(request: Request, nome: str = Form(...), db: Session = Depends(get_db)):
+    nome = nome.strip()
+    if not nome:
+        return templates.TemplateResponse(
+            request,
+            "funcionarios/form.html",
+            {"funcionario": None, "erro": "Nome não pode ficar em branco."},
+            status_code=422,
+        )
+    db.add(Funcionario(nome=nome))
+    db.commit()
+    return RedirectResponse("/funcionarios", status_code=303)
+
+
+@router.get("/{funcionario_id}/editar")
+def form_editar(funcionario_id: int, request: Request, db: Session = Depends(get_db)):
+    funcionario = db.get(Funcionario, funcionario_id)
+    if funcionario is None:
+        raise HTTPException(status_code=404, detail="Funcionário não encontrado")
+    return templates.TemplateResponse(
+        request, "funcionarios/form.html", {"funcionario": funcionario}
+    )
+
+
+@router.post("/{funcionario_id}/editar")
+def editar(
+    funcionario_id: int, request: Request, nome: str = Form(...), db: Session = Depends(get_db)
+):
+    funcionario = db.get(Funcionario, funcionario_id)
+    if funcionario is None:
+        raise HTTPException(status_code=404, detail="Funcionário não encontrado")
+    nome = nome.strip()
+    if not nome:
+        return templates.TemplateResponse(
+            request,
+            "funcionarios/form.html",
+            {"funcionario": funcionario, "erro": "Nome não pode ficar em branco."},
+            status_code=422,
+        )
+    funcionario.nome = nome
+    db.commit()
+    return RedirectResponse("/funcionarios", status_code=303)
+
+
+@router.post("/{funcionario_id}/inativar")
+def inativar(funcionario_id: int, db: Session = Depends(get_db)):
+    funcionario = db.get(Funcionario, funcionario_id)
+    if funcionario is None:
+        raise HTTPException(status_code=404, detail="Funcionário não encontrado")
+    funcionario.ativo = False
+    db.commit()
+    return RedirectResponse("/funcionarios", status_code=303)
+
+
+@router.post("/{funcionario_id}/ativar")
+def ativar(funcionario_id: int, db: Session = Depends(get_db)):
+    funcionario = db.get(Funcionario, funcionario_id)
+    if funcionario is None:
+        raise HTTPException(status_code=404, detail="Funcionário não encontrado")
+    funcionario.ativo = True
+    db.commit()
+    return RedirectResponse("/funcionarios", status_code=303)
