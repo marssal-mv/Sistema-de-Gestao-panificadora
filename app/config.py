@@ -16,6 +16,7 @@ class Settings(BaseSettings):
 
     database_url: str
     secret_key: str
+    log_level: str = "INFO"
 
 
 # Instância única, importada pelo resto da aplicação (padrão "settings singleton").

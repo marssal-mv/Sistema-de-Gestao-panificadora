@@ -1,24 +1,46 @@
 """
 Ponto de entrada da aplicação FastAPI.
 
-Por enquanto só sobe o esqueleto: uma rota de dashboard (placeholder) e uma
-rota de healthcheck. As rotas de verdade (funcionários, despesas, caixa)
-entram no próximo passo do plano, uma funcionalidade por vez.
+Registra os routers de cada funcionalidade, configura logging e tem um
+handler global pra erros não tratados (loga a exceção completa e devolve
+uma página genérica, sem vazar detalhes internos pra quem está usando).
 """
+
+import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from app.config import settings
+from app.logging_config import setup_logging
 from app.routers import funcionarios, pagamentos
 
-app = FastAPI(title="Sistema Pra Padaria")
+setup_logging(settings.log_level)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    logger.info("Aplicação iniciada")
+    yield
+    logger.info("Aplicação encerrada")
+
+
+app = FastAPI(title="Sistema Pra Padaria", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(funcionarios.router)
 app.include_router(pagamentos.router)
+
+
+@app.exception_handler(Exception)
+async def erro_nao_tratado(request: Request, _exc: Exception):
+    logger.exception("Erro não tratado em %s %s", request.method, request.url.path)
+    return templates.TemplateResponse(request, "erro.html", {}, status_code=500)
 
 
 @app.get("/healthz")
