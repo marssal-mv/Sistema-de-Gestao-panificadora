@@ -1,0 +1,16 @@
+# Sobe um PostgreSQL local para desenvolvimento, igual ao que será usado em produção.
+# Uso: docker compose up -d
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: padaria
+      POSTGRES_PASSWORD: padaria
+      POSTGRES_DB: padaria
+    ports:
+      - "5432:5432"
+    volumes:
+      - padaria_db_data:/var/lib/postgresql/data
+
+volumes:
+  padaria_db_data:
