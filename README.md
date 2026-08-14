@@ -169,9 +169,12 @@ Endpoints implementados até agora:
 | `GET` | `/despesas` | Histórico de despesas, com filtro opcional `?data_inicio=&data_fim=` |
 | `GET` | `/despesas/novo` | Formulário de nova despesa |
 | `POST` | `/despesas` | Registra despesa |
+| `GET` | `/fechamentos-caixa` | Lista de fechamentos de caixa anteriores |
+| `GET` | `/fechamentos-caixa/novo` | Formulário de novo fechamento |
+| `POST` | `/fechamentos-caixa` | Registra fechamento (erro amigável se já existir um pra mesma data) |
 
-Fechamento de Caixa e Dashboard real ainda não foram implementados (ver
-`CLAUDE.md` seção 8 pro roadmap).
+Dashboard real ainda não foi implementado (ver `CLAUDE.md` seção 8 pro
+roadmap).
 
 ## Regras de negócio importantes
 

@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Novo fechamento de caixa{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Novo fechamento de caixa</h1>
+
+    {% if erro %}
+        <div class="alert alert-danger">{{ erro }}</div>
+    {% endif %}
+
+    <form method="post" action="/fechamentos-caixa" class="col-md-6">
+        <div class="mb-3">
+            <label for="data" class="form-label">Data</label>
+            <input
+                type="date"
+                class="form-control"
+                id="data"
+                name="data"
+                value="{{ valores.data or '' }}"
+                required
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="cedulas_troco" class="form-label">Cédulas troco (R$)</label>
+            <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                id="cedulas_troco"
+                name="cedulas_troco"
+                value="{{ valores.cedulas_troco or '0' }}"
+                required
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="cedulas_inteiro" class="form-label">Cédulas inteiro (R$)</label>
+            <input
+                type="number"
+                step="0.01"
+                min="0"
+                class="form-control"
+                id="cedulas_inteiro"
+                name="cedulas_inteiro"
+                value="{{ valores.cedulas_inteiro or '0' }}"
+                required
+            >
+        </div>
+
+        <div class="mb-3">
+            <label for="observacao" class="form-label">Observação (opcional)</label>
+            <textarea class="form-control" id="observacao" name="observacao" rows="2">{{ valores.observacao or "" }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Salvar</button>
+        <a href="/fechamentos-caixa" class="btn btn-link">Cancelar</a>
+    </form>
+{% endblock %}

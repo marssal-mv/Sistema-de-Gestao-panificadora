@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import settings
 from app.logging_config import setup_logging
-from app.routers import despesas, funcionarios, pagamentos
+from app.routers import despesas, fechamentos_caixa, funcionarios, pagamentos
 
 setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
@@ -36,6 +36,7 @@ templates = Jinja2Templates(directory="app/templates")
 app.include_router(funcionarios.router)
 app.include_router(pagamentos.router)
 app.include_router(despesas.router)
+app.include_router(fechamentos_caixa.router)
 
 
 @app.exception_handler(Exception)
