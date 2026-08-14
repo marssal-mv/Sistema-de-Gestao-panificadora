@@ -1,38 +1,98 @@
 # Sistema Pra Padaria — Panificadora Rosa de Saron
 
-Sistema de gestão para substituir os cadernos de controle manual da padaria.
-Contexto completo do projeto, levantamento de requisitos e decisões de
-arquitetura estão no documento "levantamento de requisitos - fase 1" do
-projeto Claude "Sistema Pra Padaria".
+Sistema de gestão para substituir os cadernos de controle manual da padaria da
+família. Contexto completo do levantamento de requisitos e decisões de
+arquitetura está no [`CLAUDE.md`](CLAUDE.md).
 
-## Estrutura do projeto
+## Objetivo e funcionamento geral
+
+Hoje o controle diário da padaria (pagamentos a funcionários, despesas,
+fechamento de caixa) é feito em caderno de papel. O sistema digitaliza esse
+controle: cada funcionalidade do caderno vira uma tela simples, sem exigir
+conhecimento técnico de quem usa (o usuário final real é o pai do
+desenvolvedor, dono da padaria).
+
+Não há controle de vendas/nota fiscal — a padaria não emite nota na maior
+parte do atendimento, então isso é um projeto futuro separado, fora de escopo
+por enquanto.
+
+## Arquitetura e principais componentes
+
+Monolito server-rendered: um único processo Python serve tanto as rotas de
+dados quanto o HTML já pronto (sem frontend separado, sem API JSON pública).
+
+| Camada | Tecnologia |
+|---|---|
+| Framework web | FastAPI |
+| Banco de dados | PostgreSQL 16 (local via Docker) |
+| ORM / migrations | SQLAlchemy 2.0 + Alembic |
+| Templates | Jinja2 + Bootstrap 5 (via CDN) |
+| Logging | biblioteca padrão `logging` (sem dependência extra) |
+
+Por que monolito e não API + frontend separados: um único usuário (o pai),
+sem necessidade de app mobile por enquanto — separar traria complexidade
+(CORS, dois deploys) sem benefício real agora. Justificativas completas de
+cada escolha de arquitetura estão no `CLAUDE.md`, seção 5.
+
+## Estrutura de pastas
 
 ```
 app/
-  main.py           # cria a aplicação FastAPI e registra as rotas
-  config.py         # lê variáveis de ambiente (.env) de forma tipada
-  database.py       # engine do SQLAlchemy, sessão, Base dos modelos
-  models/           # um arquivo por tabela (funcionário, pagamento, despesa, ...)
-  routers/          # rotas da aplicação, agrupadas por funcionalidade (vazio por enquanto)
-  templates/        # páginas HTML (Jinja2), com base.html sendo o layout comum
-  static/           # CSS/JS/imagens servidos diretamente
-alembic/            # histórico versionado de mudanças no schema do banco
-docker-compose.yml  # sobe um PostgreSQL local para desenvolvimento
+  main.py             # cria o FastAPI app, registra routers, logging, handler de erro global
+  config.py           # Settings (pydantic-settings) — lê variáveis de ambiente do .env
+  database.py         # engine do SQLAlchemy, SessionLocal, Base, dependency get_db()
+  logging_config.py   # configuração central de logging (console + arquivo)
+  models/             # um arquivo por tabela (funcionário, pagamento, despesa, forma_pagamento, fechamento_caixa)
+  routers/             # rotas da aplicação, um arquivo por funcionalidade
+  templates/           # páginas HTML (Jinja2); base.html é o layout comum;
+                        # cada funcionalidade tem sua subpasta (ex: funcionarios/, pagamentos/)
+  static/css/          # CSS customizado (Bootstrap vem do CDN)
+alembic/                # histórico versionado de mudanças no schema do banco
+  versions/             # uma migration por mudança de schema
+logs/                   # gerado em runtime (git-ignorado) — ver seção "Logs" abaixo
+docker-compose.yml      # sobe um PostgreSQL local para desenvolvimento
+requirements.txt        # dependências Python fixadas por versão exata
+.env.example             # modelo de variáveis de ambiente — copiar para .env
 ```
 
-## Como rodar localmente
+## Tecnologias e dependências
+
+Ver [`requirements.txt`](requirements.txt) para as versões exatas. Resumo do
+que cada uma faz no projeto:
+
+| Pacote | Papel |
+|---|---|
+| `fastapi` | framework web (rotas, validação de request, injeção de dependência) |
+| `uvicorn[standard]` | servidor ASGI que roda a aplicação |
+| `sqlalchemy` | ORM — mapeia classes Python para tabelas do Postgres |
+| `alembic` | gera e aplica migrations (mudanças versionadas de schema) |
+| `psycopg[binary]` | driver de conexão com o PostgreSQL (psycopg3) |
+| `pydantic-settings` | leitura tipada de variáveis de ambiente (`app/config.py`) |
+| `jinja2` | motor de templates HTML |
+| `python-multipart` | necessário pro FastAPI ler dados de formulário (`Form(...)`) |
+| `passlib[bcrypt]` | hash de senha — reservado pra quando login for implementado (ainda não está) |
+
+**Nota de compatibilidade:** o projeto roda em Python 3.14 (recente). Duas
+dependências precisaram de versão específica por causa disso — ver
+`CLAUDE.md` seção 7 para o histórico completo (troca de `psycopg2-binary`
+por `psycopg[binary]`, e `sqlalchemy` fixado em `2.0.52` por um bug de
+tipagem em versões anteriores).
+
+## Como executar localmente
 
 1. Criar e ativar um ambiente virtual Python:
    ```
    python -m venv .venv
-   source .venv/bin/activate
+   .venv\Scripts\Activate.ps1      # Windows PowerShell
+   # ou: source .venv/bin/activate  # Linux/Mac
    ```
 2. Instalar as dependências:
    ```
    pip install -r requirements.txt
    ```
-3. Copiar `.env.example` para `.env` e ajustar se necessário.
-4. Subir o banco de dados local (requer Docker):
+3. Copiar `.env.example` para `.env` e ajustar se necessário (ver seção
+   seguinte).
+4. Subir o banco de dados local (requer Docker Desktop rodando):
    ```
    docker compose up -d
    ```
@@ -46,9 +106,181 @@ docker-compose.yml  # sobe um PostgreSQL local para desenvolvimento
    ```
 7. Acessar http://localhost:8000
 
-## Estado atual
+## Configurações e variáveis de ambiente
 
-Isso é só o esqueleto do projeto (passo 10 do plano): a aplicação sobe, se
-conecta ao layout base e aos modelos já estão definidos, mas nenhuma
-funcionalidade (cadastrar funcionário, registrar pagamento, etc.) foi
-implementada ainda. Isso vem no próximo passo, uma de cada vez.
+Definidas em `app/config.py`, lidas do arquivo `.env` (nunca commitado —
+está no `.gitignore`). Ver `.env.example` para o modelo.
+
+| Variável | Obrigatória | Padrão | Descrição |
+|---|---|---|---|
+| `DATABASE_URL` | Sim | — | String de conexão SQLAlchemy com o Postgres. Formato: `postgresql+psycopg://usuario:senha@host:porta/banco` |
+| `SECRET_KEY` | Sim | — | Chave pra assinar cookie de sessão. Reservada pro login (ainda não implementado). Gerar com `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `LOG_LEVEL` | Não | `INFO` | Nível de detalhe dos logs: `DEBUG`, `INFO`, `WARNING` ou `ERROR` |
+
+Se `DATABASE_URL` ou `SECRET_KEY` não estiverem definidas, a aplicação falha
+imediatamente ao subir com uma mensagem clara de qual variável falta — isso é
+proposital (ver comentário em `app/config.py`).
+
+## Banco de dados: entidades e relacionamentos
+
+5 tabelas, criadas via Alembic (não editar o schema direto no banco — sempre
+via migration). Schema completo comentado em `CLAUDE.md` seção 6; resumo:
+
+- **`funcionarios`** — nome, `ativo` (soft delete: nunca é apagado de
+  verdade, só marcado inativo, pra não quebrar o histórico de pagamentos).
+- **`formas_pagamento`** — tabela de apoio (hoje: Dinheiro, Pix). É tabela e
+  não um valor fixo no código porque a lista deve crescer quando Vendas for
+  implementado.
+- **`pagamentos`** — pagamento a um funcionário. `funcionario_id` → FK pra
+  `funcionarios`, `forma_pagamento_id` → FK pra `formas_pagamento`. Valor
+  sempre `> 0` (constraint no banco).
+- **`despesas`** — gasto da padaria (compras, fornecedores). Independente,
+  sem FK pra outras tabelas do domínio. `fornecedor` é texto livre
+  (proposital — só vira tabela própria se/quando fizer sentido).
+- **`fechamentos_caixa`** — um por dia (`data` é `UNIQUE`). `total` não é
+  uma coluna: é sempre `cedulas_troco + cedulas_inteiro`, calculado na hora
+  (nunca armazenado, pra não correr risco de ficar desatualizado).
+
+**Relacionamento:** Funcionário 1–N Pagamento. Despesa e FechamentoCaixa são
+independentes.
+
+Todo valor monetário é `NUMERIC(10,2)`, nunca `FLOAT` (evita erro de
+arredondamento com dinheiro).
+
+## APIs e principais endpoints
+
+Não é uma API JSON — as rotas devolvem HTML renderizado (exceto `/healthz`).
+Endpoints implementados até agora:
+
+| Método | Rota | Descrição |
+|---|---|---|
+| `GET` | `/` | Dashboard (placeholder — ainda não junta os dados reais) |
+| `GET` | `/healthz` | Health check simples, `{"status": "ok"}` |
+| `GET` | `/funcionarios` | Lista funcionários (só ativos por padrão; `?mostrar_inativos=true` mostra todos) |
+| `GET` | `/funcionarios/novo` | Formulário de cadastro |
+| `POST` | `/funcionarios` | Cria funcionário |
+| `GET` | `/funcionarios/{id}/editar` | Formulário de edição |
+| `POST` | `/funcionarios/{id}/editar` | Salva edição |
+| `POST` | `/funcionarios/{id}/inativar` | Soft delete |
+| `POST` | `/funcionarios/{id}/ativar` | Reativa |
+| `GET` | `/pagamentos` | Histórico de pagamentos, com filtro opcional `?funcionario_id=` e `?data_inicio=&data_fim=` |
+| `GET` | `/pagamentos/novo` | Formulário de novo pagamento |
+| `POST` | `/pagamentos` | Registra pagamento |
+
+Despesas, Fechamento de Caixa e Dashboard real ainda não foram
+implementados (ver `CLAUDE.md` seção 8 pro roadmap).
+
+## Regras de negócio importantes
+
+- **Soft delete em funcionário:** nunca é feito `DELETE`. Inativar marca
+  `ativo=False`, preservando o histórico de pagamentos.
+- **Pagamento a ex-funcionário continua consultável:** o filtro de
+  funcionário no histórico de pagamentos mostra inativos também (marcados
+  como "(inativo)"), mas o formulário de **novo** pagamento só lista ativos.
+- **Só Dinheiro afeta o caixa físico.** Pagamentos e despesas em Pix são
+  saída real de dinheiro da padaria, mas não mexem no saldo físico do caixa
+  — essa regra ainda não está implementada em código (entra no Dashboard),
+  mas já está definida e deve ser seguida quando for.
+- **Categoria de despesa é sempre opcional**, nunca obrigatória — o pai não
+  categoriza gastos mentalmente, só anota "nome + valor".
+- **Import de modelos sempre via pacote:** `from app.models import X`,
+  nunca `from app.models.NOME import X` direto. Os relacionamentos entre
+  tabelas são resolvidos pelo SQLAlchemy por nome de classe (string), e
+  todos os 5 modelos precisam estar registrados antes da primeira query.
+
+## Fluxos importantes
+
+**Cadastrar e pagar um funcionário (fluxo típico):**
+1. `/funcionarios/novo` → cadastra o nome.
+2. `/pagamentos/novo` → o funcionário recém-criado aparece no select
+   (só funcionários ativos aparecem aqui).
+3. Escolhe forma de pagamento, valor, data, observação opcional → salva.
+4. O pagamento aparece em `/pagamentos`, filtrável por funcionário/período.
+
+**Validação de formulário:** os campos que o usuário digita livremente
+(nome, valor, data) são recebidos como texto puro nas rotas e validados
+manualmente, devolvendo a mesma tela com uma mensagem de erro em português
+— em vez de deixar o FastAPI gerar um erro de validação em JSON (ruim pra
+quem não é técnico). Ver `app/routers/pagamentos.py` função `criar` como
+exemplo desse padrão.
+
+**Erro inesperado (bug, banco fora do ar, etc.):** um handler global em
+`app/main.py` captura qualquer exceção não tratada, grava o traceback
+completo no log, e devolve uma página de erro genérica pro usuário — sem
+vazar detalhes internos (stack trace, string de conexão) na tela. Ver seção
+"Logs" abaixo.
+
+## Logs
+
+Sistema de logging usa só a biblioteca padrão do Python (`logging`), sem
+dependência nova — configurado em `app/logging_config.py`.
+
+**Onde encontrar:**
+- **Console** — enquanto `uvicorn --reload` está rodando, aparece direto no
+  terminal.
+- **Arquivo** — `logs/app.log` (pasta criada automaticamente, git-ignorada).
+  Rotaciona em 5MB, mantém os 3 arquivos anteriores (`app.log.1`,
+  `app.log.2`, `app.log.3`), pra não crescer sem limite.
+
+**Formato de cada linha:**
+```
+2026-08-14 13:46:18 | INFO     | app.routers.pagamentos | Pagamento registrado: id=2 funcionario_id=8 forma_pagamento_id=1 valor=99.90 data=2026-08-14
+```
+`data/hora | NÍVEL | módulo de origem | mensagem`. O "módulo de origem"
+identifica de qual arquivo veio o log (ex: `app.routers.funcionarios`),
+então dá pra saber a origem sem abrir todo o log.
+
+**Níveis usados:**
+- `INFO` — eventos de negócio que aconteceram de verdade: funcionário
+  cadastrado/editado/inativado/reativado, pagamento registrado. Nível
+  padrão (`LOG_LEVEL=INFO` no `.env`).
+- `WARNING` — algo fora do fluxo normal, mas não é bug: tentativa de
+  editar/inativar um funcionário que não existe (ex: link antigo, ID
+  digitado errado na URL), tentativa de registrar pagamento pra
+  funcionário ou forma de pagamento inexistente.
+- `ERROR` — exceção não tratada (bug real ou infraestrutura fora do ar,
+  ex: banco de dados inacessível). Sempre com o traceback completo, gerado
+  automaticamente pelo handler global de erro em `app/main.py`.
+
+**O que propositalmente não é logado:** erro de validação de formulário
+(nome em branco, valor inválido, data mal formatada) — são enganos comuns
+de digitação, já mostrados na tela pro usuário na hora, e logar cada um
+poluiria o log sem agregar valor pra investigar um problema real. Também
+nunca se loga senha, `SECRET_KEY`, ou o conteúdo de `DATABASE_URL`.
+
+**Ajustar o nível de detalhe:** mudar `LOG_LEVEL` no `.env` (`DEBUG` mostra
+mais, `WARNING` mostra menos) e reiniciar a aplicação.
+
+### Solucionando problemas comuns
+
+**"Erro interno" na tela (página genérica de erro):**
+Olhe a linha mais recente de nível `ERROR` em `logs/app.log` — vai ter o
+traceback completo apontando o arquivo e linha exatos. As causas mais
+comuns até agora:
+- Postgres não está rodando → `docker compose up -d` e espere alguns
+  segundos antes de tentar de novo.
+- Migration não aplicada → `alembic upgrade head`.
+
+**Aplicação não sobe, erro de variável de ambiente faltando:**
+`.env` não existe ou está sem `DATABASE_URL`/`SECRET_KEY`. Copie de
+`.env.example`.
+
+**`pip install` falha ao compilar algum pacote (erro sobre "Microsoft
+Visual C++ Build Tools"):**
+Sintoma já visto com `psycopg2-binary` no Python 3.14 — resolvido trocando
+pra `psycopg[binary]`, que já está no `requirements.txt` atual. Se
+acontecer com outro pacote no futuro, geralmente significa que não existe
+wheel pré-compilado pra essa versão do Python/SO, e a solução é achar uma
+alternativa com wheel pronto, não instalar as Build Tools (pesado e
+desnecessário na maioria dos casos).
+
+**Acentos aparecem corrompidos no console** (tipo `Aplica��o` em vez de
+`Aplicação`): já corrigido em `app/logging_config.py` (o console do Windows
+não usa UTF-8 por padrão). Se voltar a acontecer em outro ambiente, o
+arquivo `logs/app.log` sempre está correto em UTF-8 mesmo que o console não
+esteja — pode conferir por ali.
+
+**Docker Desktop não inicia / "Virtualization support not detected":**
+Verifique se o WSL2 está instalado (`wsl --status` num terminal
+administrador; se não reconhecer, rode `wsl --install` como administrador e
+reinicie o Windows).
