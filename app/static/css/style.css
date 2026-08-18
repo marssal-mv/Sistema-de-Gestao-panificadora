@@ -1,1 +1,46 @@
 /* Estilos próprios além do Bootstrap entram aqui conforme o projeto evolui. */
+
+/*
+ * Paleta extraída da logo real (app/static/img/logo.png), pixel a pixel,
+ * não estimada visualmente. Contraste conferido (WCAG): branco sobre o
+ * marrom passa em AA (13.75:1), preto sobre o dourado também (7.79:1).
+ */
+:root {
+    --padaria-marrom: #561801;
+    --padaria-dourado: #be984f;
+    --padaria-dourado-escuro: #a1813f; /* hover/active dos botões */
+
+    /* Sobrescreve a variável global do Bootstrap: afeta border-primary,
+       text-primary etc. em qualquer lugar do site, não só os botões. */
+    --bs-primary: var(--padaria-dourado);
+    --bs-primary-rgb: 190, 152, 79;
+}
+
+.bg-padaria {
+    background-color: var(--padaria-marrom);
+}
+
+.navbar-logo {
+    height: 44px;
+    width: auto;
+}
+
+/*
+ * Reskin do botão primário via CSS custom properties do próprio Bootstrap
+ * 5.3 (--bs-btn-*), escopado só em .btn-primary — não precisa de
+ * !important nem de recompilar o Sass do Bootstrap.
+ */
+.btn-primary {
+    --bs-btn-bg: var(--padaria-dourado);
+    --bs-btn-border-color: var(--padaria-dourado);
+    --bs-btn-color: #000;
+    --bs-btn-hover-bg: var(--padaria-dourado-escuro);
+    --bs-btn-hover-border-color: var(--padaria-dourado-escuro);
+    --bs-btn-hover-color: #000;
+    --bs-btn-active-bg: var(--padaria-dourado-escuro);
+    --bs-btn-active-border-color: var(--padaria-dourado-escuro);
+    --bs-btn-active-color: #000;
+    --bs-btn-disabled-bg: var(--padaria-dourado);
+    --bs-btn-disabled-border-color: var(--padaria-dourado);
+    --bs-btn-focus-shadow-rgb: 190, 152, 79;
+}

@@ -46,7 +46,8 @@ app/
   routers/             # rotas da aplicação, um arquivo por funcionalidade
   templates/           # páginas HTML (Jinja2); base.html é o layout comum;
                         # cada funcionalidade tem sua subpasta (ex: funcionarios/, pagamentos/)
-  static/css/          # CSS customizado (Bootstrap vem do CDN)
+  static/css/          # CSS customizado (Bootstrap vem do CDN) + paleta da marca
+  static/img/           # logo e outros assets visuais
 alembic/                # histórico versionado de mudanças no schema do banco
   versions/             # uma migration por mudança de schema
 logs/                   # gerado em runtime (git-ignorado) — ver seção "Logs" abaixo
