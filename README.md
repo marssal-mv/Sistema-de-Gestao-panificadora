@@ -154,7 +154,7 @@ Endpoints implementados até agora:
 
 | Método | Rota | Descrição |
 |---|---|---|
-| `GET` | `/` | Dashboard (placeholder — ainda não junta os dados reais) |
+| `GET` | `/` | Dashboard: saídas de hoje por forma de pagamento + saldo estimado do caixa |
 | `GET` | `/healthz` | Health check simples, `{"status": "ok"}` |
 | `GET` | `/funcionarios` | Lista funcionários (só ativos por padrão; `?mostrar_inativos=true` mostra todos) |
 | `GET` | `/funcionarios/novo` | Formulário de cadastro |
@@ -173,8 +173,8 @@ Endpoints implementados até agora:
 | `GET` | `/fechamentos-caixa/novo` | Formulário de novo fechamento |
 | `POST` | `/fechamentos-caixa` | Registra fechamento (erro amigável se já existir um pra mesma data) |
 
-Dashboard real ainda não foi implementado (ver `CLAUDE.md` seção 8 pro
-roadmap).
+Todas as fases do MVP original estão implementadas (ver `CLAUDE.md`
+seção 8).
 
 ## Regras de negócio importantes
 
@@ -184,9 +184,17 @@ roadmap).
   funcionário no histórico de pagamentos mostra inativos também (marcados
   como "(inativo)"), mas o formulário de **novo** pagamento só lista ativos.
 - **Só Dinheiro afeta o caixa físico.** Pagamentos e despesas em Pix são
-  saída real de dinheiro da padaria, mas não mexem no saldo físico do caixa
-  — essa regra ainda não está implementada em código (entra no Dashboard),
-  mas já está definida e deve ser seguida quando for.
+  saída real de dinheiro da padaria, mas não mexem no saldo físico do
+  caixa. Implementado no dashboard: o saldo estimado só desconta saídas
+  com forma de pagamento = Dinheiro.
+- **O caixa sempre abre com o troco que sobrou do fechamento anterior**
+  (confirmado com o dono da padaria — não existe um fundo fixo definido à
+  parte). O dashboard usa `cedulas_troco` do último `FechamentoCaixa`
+  antes de hoje como fundo inicial do dia.
+- **O saldo estimado do dashboard não inclui vendas do dia** — o sistema
+  não registra vendas (fora de escopo, ver seção "Objetivo" acima), então
+  o valor mostrado é só fundo inicial menos saídas em Dinheiro, pensado
+  pra conferir contra a contagem física do caixa, não como um total exato.
 - **Categoria de despesa é sempre opcional**, nunca obrigatória — o pai não
   categoriza gastos mentalmente, só anota "nome + valor".
 - **Import de modelos sempre via pacote:** `from app.models import X`,

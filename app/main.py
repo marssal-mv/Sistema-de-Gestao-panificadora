@@ -15,7 +15,7 @@ from fastapi.templating import Jinja2Templates
 
 from app.config import settings
 from app.logging_config import setup_logging
-from app.routers import despesas, fechamentos_caixa, funcionarios, pagamentos
+from app.routers import dashboard, despesas, fechamentos_caixa, funcionarios, pagamentos
 
 setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
@@ -33,6 +33,7 @@ app = FastAPI(title="Sistema Pra Padaria", lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
+app.include_router(dashboard.router)
 app.include_router(funcionarios.router)
 app.include_router(pagamentos.router)
 app.include_router(despesas.router)
@@ -49,8 +50,3 @@ async def erro_nao_tratado(request: Request, _exc: Exception):
 def healthz():
     """Usado para verificar rapidamente se a aplicação está de pé."""
     return {"status": "ok"}
-
-
-@app.get("/")
-def dashboard(request: Request):
-    return templates.TemplateResponse(request, "dashboard.html")

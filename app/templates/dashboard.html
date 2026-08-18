@@ -3,9 +3,76 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-    <h1 class="mb-4">Dashboard</h1>
-    <p class="text-muted">
-        Esqueleto do projeto funcionando. As funcionalidades reais (saídas do dia,
-        situação do caixa, etc.) entram no próximo passo, uma de cada vez.
-    </p>
+    <h1 class="mb-4">Dashboard — {{ hoje.strftime("%d/%m/%Y") }}</h1>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Fundo de caixa (troco de ontem)</h2>
+                    {% if fundo_inicial is not none %}
+                        <p class="fs-4 mb-0">R$ {{ "%.2f"|format(fundo_inicial) }}</p>
+                    {% else %}
+                        <p class="text-muted mb-0">Nenhum fechamento anterior registrado ainda.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Saídas em Dinheiro hoje</h2>
+                    <p class="fs-4 mb-0">R$ {{ "%.2f"|format(saidas_dinheiro_hoje) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 {% if saldo_estimado is not none %}border-primary{% endif %}">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Saldo estimado em caixa agora</h2>
+                    {% if saldo_estimado is not none %}
+                        <p class="fs-4 mb-0">R$ {{ "%.2f"|format(saldo_estimado) }}</p>
+                        <p class="small text-muted mb-0">
+                            Não inclui vendas do dia — o sistema ainda não registra vendas.
+                            Use pra conferir contra a contagem física do caixa.
+                        </p>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            Sem fechamento anterior registrado, não dá pra estimar.
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h4 mb-3">Saídas de hoje por forma de pagamento</h2>
+    <table class="table table-hover align-middle" style="max-width: 30rem;">
+        <thead>
+            <tr>
+                <th>Forma de pagamento</th>
+                <th class="text-end">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for forma, total in saidas_por_forma.items() %}
+            <tr>
+                <td>{{ forma }}</td>
+                <td class="text-end">R$ {{ "%.2f"|format(total) }}</td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="2" class="text-muted">Nenhuma saída registrada hoje.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        {% if saidas_por_forma %}
+        <tfoot>
+            <tr>
+                <th>Total geral</th>
+                <th class="text-end">R$ {{ "%.2f"|format(total_saidas_hoje) }}</th>
+            </tr>
+        </tfoot>
+        {% endif %}
+    </table>
 {% endblock %}
