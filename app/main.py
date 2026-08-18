@@ -11,11 +11,11 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 
 from app.config import settings
 from app.logging_config import setup_logging
 from app.routers import dashboard, despesas, fechamentos_caixa, funcionarios, pagamentos
+from app.templating import templates
 
 setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
@@ -31,7 +31,6 @@ async def lifespan(_app: FastAPI):
 app = FastAPI(title="Sistema Pra Padaria", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
 
 app.include_router(dashboard.router)
 app.include_router(funcionarios.router)

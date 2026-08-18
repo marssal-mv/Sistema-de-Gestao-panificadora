@@ -3,15 +3,14 @@ from datetime import date
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, Request
-from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models import Despesa, FechamentoCaixa, Pagamento
+from app.templating import templates
 
 router = APIRouter(tags=["dashboard"])
-templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/")
