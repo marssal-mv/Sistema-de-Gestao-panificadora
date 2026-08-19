@@ -169,12 +169,18 @@ Endpoints implementados até agora:
 | `GET` | `/pagamentos` | Histórico de pagamentos, com filtro opcional `?funcionario_id=` e `?data_inicio=&data_fim=` |
 | `GET` | `/pagamentos/novo` | Formulário de novo pagamento |
 | `POST` | `/pagamentos` | Registra pagamento |
+| `GET` | `/pagamentos/{id}/editar` | Formulário de edição |
+| `POST` | `/pagamentos/{id}/editar` | Salva edição |
 | `GET` | `/despesas` | Histórico de despesas, com filtro opcional `?data_inicio=&data_fim=` |
 | `GET` | `/despesas/novo` | Formulário de nova despesa |
 | `POST` | `/despesas` | Registra despesa |
+| `GET` | `/despesas/{id}/editar` | Formulário de edição |
+| `POST` | `/despesas/{id}/editar` | Salva edição |
 | `GET` | `/fechamentos-caixa` | Lista de fechamentos de caixa anteriores |
 | `GET` | `/fechamentos-caixa/novo` | Formulário de novo fechamento |
 | `POST` | `/fechamentos-caixa` | Registra fechamento (erro amigável se já existir um pro mesmo dia + turno) |
+| `GET` | `/fechamentos-caixa/{id}/editar` | Formulário de edição |
+| `POST` | `/fechamentos-caixa/{id}/editar` | Salva edição |
 
 Todas as fases do MVP original estão implementadas (ver `CLAUDE.md`
 seção 8).

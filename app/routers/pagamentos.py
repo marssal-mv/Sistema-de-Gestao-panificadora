@@ -2,7 +2,7 @@ import logging
 from datetime import date
 from decimal import Decimal, InvalidOperation
 
-from fastapi import APIRouter, Depends, Form, Request
+from fastapi import APIRouter, Depends, Form, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -145,5 +145,119 @@ def criar(
         forma_pagamento_id,
         valor_decimal,
         data_valor,
+    )
+    return RedirectResponse("/pagamentos", status_code=303)
+
+
+@router.get("/{pagamento_id}/editar")
+def form_editar(pagamento_id: int, request: Request, db: Session = Depends(get_db)):
+    pagamento = db.get(Pagamento, pagamento_id)
+    if pagamento is None:
+        logger.warning("Tentativa de editar pagamento inexistente: id=%s", pagamento_id)
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
+    # Inclui inativos aqui (diferente do form de criar): o pagamento pode já
+    # ter sido feito a um funcionário que saiu depois, e o select precisa
+    # conseguir mostrar a seleção atual mesmo assim.
+    funcionarios = db.scalars(select(Funcionario).order_by(Funcionario.nome)).all()
+    formas_pagamento = db.scalars(select(FormaPagamento).order_by(FormaPagamento.nome)).all()
+    return templates.TemplateResponse(
+        request,
+        "pagamentos/form.html",
+        {
+            "pagamento": pagamento,
+            "funcionarios": funcionarios,
+            "formas_pagamento": formas_pagamento,
+            "valores": {
+                "funcionario_id": pagamento.funcionario_id,
+                "forma_pagamento_id": pagamento.forma_pagamento_id,
+                "valor": str(pagamento.valor),
+                "data": pagamento.data.isoformat(),
+                "observacao": pagamento.observacao,
+            },
+        },
+    )
+
+
+@router.post("/{pagamento_id}/editar")
+def editar(
+    pagamento_id: int,
+    request: Request,
+    funcionario_id: int = Form(...),
+    forma_pagamento_id: int = Form(...),
+    valor: str = Form(...),
+    data: str = Form(...),
+    observacao: str = Form(""),
+    db: Session = Depends(get_db),
+):
+    pagamento = db.get(Pagamento, pagamento_id)
+    if pagamento is None:
+        logger.warning("Tentativa de editar pagamento inexistente: id=%s", pagamento_id)
+        raise HTTPException(status_code=404, detail="Pagamento não encontrado")
+
+    erro = None
+    valor_decimal: Decimal | None = None
+    data_valor: date | None = None
+
+    try:
+        valor_decimal = Decimal(valor.replace(",", "."))
+        if valor_decimal <= 0:
+            erro = "Valor precisa ser maior que zero."
+    except InvalidOperation:
+        erro = "Valor inválido."
+
+    if erro is None:
+        try:
+            data_valor = date.fromisoformat(data)
+        except ValueError:
+            erro = "Data inválida."
+
+    if erro is None and db.get(Funcionario, funcionario_id) is None:
+        erro = "Funcionário não encontrado."
+        logger.warning(
+            "Tentativa de editar pagamento pra funcionário inexistente: id=%s",
+            funcionario_id,
+        )
+
+    if erro is None and db.get(FormaPagamento, forma_pagamento_id) is None:
+        erro = "Forma de pagamento não encontrada."
+        logger.warning(
+            "Tentativa de editar pagamento com forma de pagamento inexistente: id=%s",
+            forma_pagamento_id,
+        )
+
+    if erro:
+        funcionarios = db.scalars(select(Funcionario).order_by(Funcionario.nome)).all()
+        formas_pagamento = db.scalars(select(FormaPagamento).order_by(FormaPagamento.nome)).all()
+        return templates.TemplateResponse(
+            request,
+            "pagamentos/form.html",
+            {
+                "pagamento": pagamento,
+                "funcionarios": funcionarios,
+                "formas_pagamento": formas_pagamento,
+                "erro": erro,
+                "valores": {
+                    "funcionario_id": funcionario_id,
+                    "forma_pagamento_id": forma_pagamento_id,
+                    "valor": valor,
+                    "data": data,
+                    "observacao": observacao,
+                },
+            },
+            status_code=422,
+        )
+
+    valor_antigo = pagamento.valor
+    pagamento.funcionario_id = funcionario_id
+    pagamento.forma_pagamento_id = forma_pagamento_id
+    pagamento.valor = valor_decimal
+    pagamento.data = data_valor
+    pagamento.observacao = observacao.strip() or None
+    db.commit()
+    logger.info(
+        "Pagamento atualizado: id=%s valor_antigo=%s valor_novo=%s",
+        pagamento.id,
+        valor_antigo,
+        valor_decimal,
     )
     return RedirectResponse("/pagamentos", status_code=303)

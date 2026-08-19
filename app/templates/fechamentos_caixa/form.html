@@ -1,15 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Novo fechamento de caixa{% endblock %}
+{% block title %}{% if fechamento %}Editar fechamento de caixa{% else %}Novo fechamento de caixa{% endif %}{% endblock %}
 
 {% block content %}
-    <h1 class="mb-4">Novo fechamento de caixa</h1>
+    <h1 class="mb-4">{% if fechamento %}Editar fechamento de caixa{% else %}Novo fechamento de caixa{% endif %}</h1>
 
     {% if erro %}
         <div class="alert alert-danger">{{ erro }}</div>
     {% endif %}
 
-    <form method="post" action="/fechamentos-caixa" class="col-md-6">
+    <form
+        method="post"
+        action="{% if fechamento %}/fechamentos-caixa/{{ fechamento.id }}/editar{% else %}/fechamentos-caixa{% endif %}"
+        class="col-md-6"
+    >
         <div class="mb-3">
             <label for="data" class="form-label">Data</label>
             <input

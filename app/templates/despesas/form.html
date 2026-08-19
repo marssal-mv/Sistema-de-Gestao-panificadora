@@ -1,15 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Nova despesa{% endblock %}
+{% block title %}{% if despesa %}Editar despesa{% else %}Nova despesa{% endif %}{% endblock %}
 
 {% block content %}
-    <h1 class="mb-4">Nova despesa</h1>
+    <h1 class="mb-4">{% if despesa %}Editar despesa{% else %}Nova despesa{% endif %}</h1>
 
     {% if erro %}
         <div class="alert alert-danger">{{ erro }}</div>
     {% endif %}
 
-    <form method="post" action="/despesas" class="col-md-6">
+    <form
+        method="post"
+        action="{% if despesa %}/despesas/{{ despesa.id }}/editar{% else %}/despesas{% endif %}"
+        class="col-md-6"
+    >
         <div class="mb-3">
             <label for="descricao" class="form-label">Descrição</label>
             <input

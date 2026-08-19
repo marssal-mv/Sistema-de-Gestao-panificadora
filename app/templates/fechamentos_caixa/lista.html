@@ -18,6 +18,7 @@
                 <th class="text-end">Cédulas inteiro</th>
                 <th class="text-end">Total</th>
                 <th>Observação</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -29,10 +30,13 @@
                 <td class="text-end">R$ {{ "%.2f"|format(fechamento.cedulas_inteiro) }}</td>
                 <td class="text-end"><strong>R$ {{ "%.2f"|format(fechamento.total) }}</strong></td>
                 <td>{{ fechamento.observacao or "" }}</td>
+                <td class="text-end">
+                    <a href="/fechamentos-caixa/{{ fechamento.id }}/editar" class="btn btn-sm btn-outline-secondary">Editar</a>
+                </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" class="text-muted">Nenhum fechamento registrado ainda.</td>
+                <td colspan="7" class="text-muted">Nenhum fechamento registrado ainda.</td>
             </tr>
             {% endfor %}
         </tbody>

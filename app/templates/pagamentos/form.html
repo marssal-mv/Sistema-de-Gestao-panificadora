@@ -1,15 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Novo pagamento{% endblock %}
+{% block title %}{% if pagamento %}Editar pagamento{% else %}Novo pagamento{% endif %}{% endblock %}
 
 {% block content %}
-    <h1 class="mb-4">Novo pagamento</h1>
+    <h1 class="mb-4">{% if pagamento %}Editar pagamento{% else %}Novo pagamento{% endif %}</h1>
 
     {% if erro %}
         <div class="alert alert-danger">{{ erro }}</div>
     {% endif %}
 
-    <form method="post" action="/pagamentos" class="col-md-6">
+    <form
+        method="post"
+        action="{% if pagamento %}/pagamentos/{{ pagamento.id }}/editar{% else %}/pagamentos{% endif %}"
+        class="col-md-6"
+    >
         <div class="mb-3">
             <label for="funcionario_id" class="form-label">Funcionário</label>
             <select name="funcionario_id" id="funcionario_id" class="form-select" required>
@@ -19,7 +23,7 @@
                     value="{{ funcionario.id }}"
                     {% if valores.funcionario_id == funcionario.id %}selected{% endif %}
                 >
-                    {{ funcionario.nome }}
+                    {{ funcionario.nome }}{% if not funcionario.ativo %} (inativo){% endif %}
                 </option>
                 {% endfor %}
             </select>

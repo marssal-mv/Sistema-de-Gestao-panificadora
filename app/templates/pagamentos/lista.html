@@ -46,6 +46,7 @@
                 <th>Forma</th>
                 <th class="text-end">Valor</th>
                 <th>Observação</th>
+                <th></th>
             </tr>
         </thead>
         <tbody>
@@ -56,10 +57,13 @@
                 <td>{{ pagamento.forma_pagamento.nome }}</td>
                 <td class="text-end">R$ {{ "%.2f"|format(pagamento.valor) }}</td>
                 <td>{{ pagamento.observacao or "" }}</td>
+                <td class="text-end">
+                    <a href="/pagamentos/{{ pagamento.id }}/editar" class="btn btn-sm btn-outline-secondary">Editar</a>
+                </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" class="text-muted">Nenhum pagamento encontrado.</td>
+                <td colspan="6" class="text-muted">Nenhum pagamento encontrado.</td>
             </tr>
             {% endfor %}
         </tbody>
