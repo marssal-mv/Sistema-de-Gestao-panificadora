@@ -9,7 +9,7 @@ from app.models.forma_pagamento import FormaPagamento
 from app.models.funcionario import Funcionario
 from app.models.pagamento import Pagamento
 from app.models.despesa import Despesa
-from app.models.fechamento_caixa import FechamentoCaixa
+from app.models.fechamento_caixa import TURNOS_VALIDOS, FechamentoCaixa
 
 __all__ = [
     "FormaPagamento",
@@ -17,4 +17,5 @@ __all__ = [
     "Pagamento",
     "Despesa",
     "FechamentoCaixa",
+    "TURNOS_VALIDOS",
 ]

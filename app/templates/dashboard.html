@@ -9,9 +9,12 @@
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-body">
-                    <h2 class="h6 text-muted">Fundo de caixa (troco de ontem)</h2>
+                    <h2 class="h6 text-muted">Fundo de caixa</h2>
                     {% if fundo_inicial is not none %}
                         <p class="fs-4 mb-0">R$ {{ "%.2f"|format(fundo_inicial) }}</p>
+                        <p class="small text-muted mb-0">
+                            Troco do fechamento de {{ ultimo_fechamento.data.strftime("%d/%m") }} ({{ ultimo_fechamento.turno }})
+                        </p>
                     {% else %}
                         <p class="text-muted mb-0">Nenhum fechamento anterior registrado ainda.</p>
                     {% endif %}

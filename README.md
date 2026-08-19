@@ -138,9 +138,11 @@ via migration). Schema completo comentado em `CLAUDE.md` seção 6; resumo:
 - **`despesas`** — gasto da padaria (compras, fornecedores). Independente,
   sem FK pra outras tabelas do domínio. `fornecedor` é texto livre
   (proposital — só vira tabela própria se/quando fizer sentido).
-- **`fechamentos_caixa`** — um por dia (`data` é `UNIQUE`). `total` não é
-  uma coluna: é sempre `cedulas_troco + cedulas_inteiro`, calculado na hora
-  (nunca armazenado, pra não correr risco de ficar desatualizado).
+- **`fechamentos_caixa`** — dois por dia (`turno`: `Manhã` ou `Noite`,
+  `CHECK` constraint; `UNIQUE(data, turno)` — um fechamento por turno
+  por dia, não um por dia). `total` não é uma coluna: é sempre
+  `cedulas_troco + cedulas_inteiro`, calculado na hora (nunca
+  armazenado, pra não correr risco de ficar desatualizado).
 
 **Relacionamento:** Funcionário 1–N Pagamento. Despesa e FechamentoCaixa são
 independentes.
@@ -172,7 +174,7 @@ Endpoints implementados até agora:
 | `POST` | `/despesas` | Registra despesa |
 | `GET` | `/fechamentos-caixa` | Lista de fechamentos de caixa anteriores |
 | `GET` | `/fechamentos-caixa/novo` | Formulário de novo fechamento |
-| `POST` | `/fechamentos-caixa` | Registra fechamento (erro amigável se já existir um pra mesma data) |
+| `POST` | `/fechamentos-caixa` | Registra fechamento (erro amigável se já existir um pro mesmo dia + turno) |
 
 Todas as fases do MVP original estão implementadas (ver `CLAUDE.md`
 seção 8).
@@ -192,6 +194,10 @@ seção 8).
   (confirmado com o dono da padaria — não existe um fundo fixo definido à
   parte). O dashboard usa `cedulas_troco` do último `FechamentoCaixa`
   antes de hoje como fundo inicial do dia.
+- **Fechamento de caixa é feito 2x por dia** (manhã e noite) — não uma
+  vez, como o MVP original supôs. O desempate de "último fechamento" no
+  dashboard usa `id DESC` além de `data DESC`, pra pegar o fechamento
+  inserido por último quando o dia anterior teve os dois turnos.
 - **O saldo estimado do dashboard não inclui vendas do dia** — o sistema
   não registra vendas (fora de escopo, ver seção "Objetivo" acima), então
   o valor mostrado é só fundo inicial menos saídas em Dinheiro, pensado

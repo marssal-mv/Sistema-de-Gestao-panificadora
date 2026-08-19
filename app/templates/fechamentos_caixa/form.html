@@ -23,6 +23,16 @@
         </div>
 
         <div class="mb-3">
+            <label for="turno" class="form-label">Turno</label>
+            <select name="turno" id="turno" class="form-select" required>
+                <option value="" disabled {% if not valores.turno %}selected{% endif %}>Selecione...</option>
+                {% for opcao in turnos %}
+                <option value="{{ opcao }}" {% if valores.turno == opcao %}selected{% endif %}>{{ opcao }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
             <label for="cedulas_troco" class="form-label">Cédulas troco (R$)</label>
             <input
                 type="number"

@@ -13,6 +13,7 @@
         <thead>
             <tr>
                 <th>Data</th>
+                <th>Turno</th>
                 <th class="text-end">Cédulas troco</th>
                 <th class="text-end">Cédulas inteiro</th>
                 <th class="text-end">Total</th>
@@ -23,6 +24,7 @@
             {% for fechamento in fechamentos %}
             <tr>
                 <td>{{ fechamento.data.strftime("%d/%m/%Y") }}</td>
+                <td>{{ fechamento.turno }}</td>
                 <td class="text-end">R$ {{ "%.2f"|format(fechamento.cedulas_troco) }}</td>
                 <td class="text-end">R$ {{ "%.2f"|format(fechamento.cedulas_inteiro) }}</td>
                 <td class="text-end"><strong>R$ {{ "%.2f"|format(fechamento.total) }}</strong></td>
@@ -30,7 +32,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" class="text-muted">Nenhum fechamento registrado ainda.</td>
+                <td colspan="6" class="text-muted">Nenhum fechamento registrado ainda.</td>
             </tr>
             {% endfor %}
         </tbody>

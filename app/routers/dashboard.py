@@ -36,10 +36,14 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     # Fundo de caixa do dia = cédulas de troco do último fechamento antes de
     # hoje (confirmado com o usuário: o caixa sempre abre com o troco que
     # sobrou do fechamento anterior, não um valor fixo definido à parte).
+    # Desde que passou a haver 2 fechamentos por dia (manhã/noite), o
+    # desempate por id.desc() garante pegar o fechamento inserido por
+    # último no dia mais recente (a noite, no uso normal), não um dos
+    # dois de forma arbitrária.
     ultimo_fechamento = db.scalar(
         select(FechamentoCaixa)
         .where(FechamentoCaixa.data < hoje)
-        .order_by(FechamentoCaixa.data.desc())
+        .order_by(FechamentoCaixa.data.desc(), FechamentoCaixa.id.desc())
         .limit(1)
     )
     fundo_inicial = ultimo_fechamento.cedulas_troco if ultimo_fechamento else None
