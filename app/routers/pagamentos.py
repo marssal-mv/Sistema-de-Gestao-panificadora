@@ -18,14 +18,21 @@ logger = logging.getLogger(__name__)
 @router.get("")
 def listar(
     request: Request,
-    funcionario_id: int | None = None,
+    funcionario_id: str = "",
     data_inicio: str = "",
     data_fim: str = "",
     db: Session = Depends(get_db),
 ):
+    # Recebido como string, não int direto: a opção "Todos" do <select>
+    # manda funcionario_id="" (string vazia), que o FastAPI não converte
+    # sozinho pra int — daria 422 automático (JSON cru, sem estilo nenhum)
+    # toda vez que alguém filtrasse com "Todos" selecionado, que é o
+    # padrão da tela.
+    funcionario_id_filtro = int(funcionario_id) if funcionario_id else None
+
     query = select(Pagamento).order_by(Pagamento.data.desc(), Pagamento.id.desc())
-    if funcionario_id:
-        query = query.where(Pagamento.funcionario_id == funcionario_id)
+    if funcionario_id_filtro:
+        query = query.where(Pagamento.funcionario_id == funcionario_id_filtro)
     if data_inicio:
         query = query.where(Pagamento.data >= date.fromisoformat(data_inicio))
     if data_fim:
@@ -41,7 +48,7 @@ def listar(
         {
             "pagamentos": pagamentos,
             "funcionarios": funcionarios,
-            "filtro_funcionario_id": funcionario_id,
+            "filtro_funcionario_id": funcionario_id_filtro,
             "filtro_data_inicio": data_inicio,
             "filtro_data_fim": data_fim,
         },
