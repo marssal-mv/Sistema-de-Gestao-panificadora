@@ -10,15 +10,22 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.config import settings
 from app.logging_config import setup_logging
-from app.routers import dashboard, despesas, fechamentos_caixa, funcionarios, pagamentos
+from app.routers import auth, dashboard, despesas, fechamentos_caixa, funcionarios, pagamentos
 from app.templating import templates
 
 setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
+
+# Rotas acessíveis sem estar logado. Tudo que não está aqui (nem começa
+# com /static/) exige sessão válida — ver o middleware exigir_login logo
+# abaixo.
+ROTAS_PUBLICAS = {"/login", "/logout", "/healthz"}
 
 
 @asynccontextmanager
@@ -32,6 +39,25 @@ app = FastAPI(title="Sistema Pra Padaria", lifespan=lifespan)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
+
+@app.middleware("http")
+async def exigir_login(request: Request, call_next):
+    caminho = request.url.path
+    publico = caminho in ROTAS_PUBLICAS or caminho.startswith("/static/")
+    if not publico and not request.session.get("usuario"):
+        return RedirectResponse("/login", status_code=303)
+    return await call_next(request)
+
+
+# SessionMiddleware precisa ser adicionado DEPOIS de exigir_login: o
+# Starlette insere cada novo middleware no INÍCIO da fila (quem é
+# adicionado por último roda primeiro na entrada da requisição), então é
+# assim que garantimos que request.session já existe quando exigir_login
+# tenta ler o usuário da sessão.
+app.add_middleware(SessionMiddleware, secret_key=settings.secret_key, session_cookie="padaria_session")
+
+
+app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(funcionarios.router)
 app.include_router(pagamentos.router)
