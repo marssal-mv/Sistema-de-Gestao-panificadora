@@ -157,7 +157,7 @@ Endpoints implementados até agora:
 
 | Método | Rota | Descrição |
 |---|---|---|
-| `GET` | `/` | Dashboard: saídas de hoje por forma de pagamento + saldo estimado do caixa |
+| `GET` | `/` | Dashboard: fundo de caixa (último fechamento) + saídas de hoje por forma de pagamento |
 | `GET` | `/healthz` | Health check simples, `{"status": "ok"}` |
 | `GET` | `/funcionarios` | Lista funcionários (só ativos por padrão; `?mostrar_inativos=true` mostra todos) |
 | `GET` | `/funcionarios/novo` | Formulário de cadastro |
@@ -194,20 +194,21 @@ seção 8).
   como "(inativo)"), mas o formulário de **novo** pagamento só lista ativos.
 - **Só Dinheiro afeta o caixa físico.** Pagamentos e despesas em Pix são
   saída real de dinheiro da padaria, mas não mexem no saldo físico do
-  caixa. Implementado no dashboard: o saldo estimado só desconta saídas
-  com forma de pagamento = Dinheiro.
+  caixa — por isso o dashboard separa "Saídas em Dinheiro" do total geral.
 - **O caixa sempre abre com o troco que sobrou do fechamento anterior**
   (confirmado com o dono da padaria — não existe um fundo fixo definido à
-  parte). O dashboard usa `cedulas_troco` do último `FechamentoCaixa`
-  antes de hoje como fundo inicial do dia.
+  parte). O dashboard usa `cedulas_troco` do fechamento mais recente
+  (`FechamentoCaixa`) como "Fundo de caixa".
 - **Fechamento de caixa é feito 2x por dia** (manhã e noite) — não uma
-  vez, como o MVP original supôs. O desempate de "último fechamento" no
-  dashboard usa `id DESC` além de `data DESC`, pra pegar o fechamento
-  inserido por último quando o dia anterior teve os dois turnos.
-- **O saldo estimado do dashboard não inclui vendas do dia** — o sistema
-  não registra vendas (fora de escopo, ver seção "Objetivo" acima), então
-  o valor mostrado é só fundo inicial menos saídas em Dinheiro, pensado
-  pra conferir contra a contagem física do caixa, não como um total exato.
+  vez, como o MVP original supôs. O desempate de "fechamento mais
+  recente" no dashboard usa o turno em si (Noite > Manhã via `CASE` no
+  SQL), não a ordem de inserção — importante pra não quebrar se um dia
+  for lançado fora de ordem.
+- **Não existe "saldo estimado do caixa" no dashboard** — chegou a ser
+  implementado, mas removido: sem registro de vendas, "fundo menos
+  saídas" só cresce negativo ao longo do dia, já que nunca soma o
+  dinheiro que entra. Métrica reintroduzível só se/quando o sistema
+  passar a registrar vendas.
 - **Categoria de despesa é sempre opcional**, nunca obrigatória — o pai não
   categoriza gastos mentalmente, só anota "nome + valor".
 - **Import de modelos sempre via pacote:** `from app.models import X`,

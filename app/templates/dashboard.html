@@ -6,7 +6,7 @@
     <h1 class="mb-4">Dashboard — {{ hoje.strftime("%d/%m/%Y") }}</h1>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-body">
                     <h2 class="h6 text-muted">Fundo de caixa</h2>
@@ -21,30 +21,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card h-100">
                 <div class="card-body">
                     <h2 class="h6 text-muted">Saídas em Dinheiro hoje</h2>
                     <p class="fs-4 mb-0">R$ {{ "%.2f"|format(saidas_dinheiro_hoje) }}</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 {% if saldo_estimado is not none %}border-primary{% endif %}">
-                <div class="card-body">
-                    <h2 class="h6 text-muted">Saldo estimado em caixa agora</h2>
-                    {% if saldo_estimado is not none %}
-                        <p class="fs-4 mb-0">R$ {{ "%.2f"|format(saldo_estimado) }}</p>
-                        <p class="small text-muted mb-0">
-                            Desde o fechamento de {{ ultimo_fechamento.data.strftime("%d/%m") }}
-                            ({{ ultimo_fechamento.turno }}). Não inclui vendas — o sistema ainda
-                            não registra vendas. Use pra conferir contra a contagem física.
-                        </p>
-                    {% else %}
-                        <p class="text-muted mb-0">
-                            Sem fechamento anterior registrado, não dá pra estimar.
-                        </p>
-                    {% endif %}
                 </div>
             </div>
         </div>
