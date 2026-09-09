@@ -20,13 +20,21 @@ def listar(
     request: Request,
     data_inicio: str = "",
     data_fim: str = "",
+    mostrar_todos: bool = False,
     db: Session = Depends(get_db),
 ):
     query = select(Despesa).order_by(Despesa.data.desc(), Despesa.id.desc())
-    if data_inicio:
-        query = query.where(Despesa.data >= date.fromisoformat(data_inicio))
-    if data_fim:
-        query = query.where(Despesa.data <= date.fromisoformat(data_fim))
+    # Sem nenhum filtro explícito, mostra só hoje — pra não misturar tudo
+    # numa lista só e confundir o usuário. "Mostrar dias anteriores" ou
+    # escolher uma data no filtro tira essa restrição.
+    somente_hoje = not mostrar_todos and not data_inicio and not data_fim
+    if somente_hoje:
+        query = query.where(Despesa.data == date.today())
+    else:
+        if data_inicio:
+            query = query.where(Despesa.data >= date.fromisoformat(data_inicio))
+        if data_fim:
+            query = query.where(Despesa.data <= date.fromisoformat(data_fim))
     despesas = db.scalars(query).all()
 
     return templates.TemplateResponse(
@@ -36,6 +44,8 @@ def listar(
             "despesas": despesas,
             "filtro_data_inicio": data_inicio,
             "filtro_data_fim": data_fim,
+            "somente_hoje": somente_hoje,
+            "hoje": date.today(),
         },
     )
 

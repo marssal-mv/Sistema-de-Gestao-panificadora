@@ -21,6 +21,7 @@ def listar(
     funcionario_id: str = "",
     data_inicio: str = "",
     data_fim: str = "",
+    mostrar_todos: bool = False,
     db: Session = Depends(get_db),
 ):
     # Recebido como string, não int direto: a opção "Todos" do <select>
@@ -31,12 +32,24 @@ def listar(
     funcionario_id_filtro = int(funcionario_id) if funcionario_id else None
 
     query = select(Pagamento).order_by(Pagamento.data.desc(), Pagamento.id.desc())
-    if funcionario_id_filtro:
-        query = query.where(Pagamento.funcionario_id == funcionario_id_filtro)
-    if data_inicio:
-        query = query.where(Pagamento.data >= date.fromisoformat(data_inicio))
-    if data_fim:
-        query = query.where(Pagamento.data <= date.fromisoformat(data_fim))
+    # Sem nenhum filtro explícito, mostra só hoje — pra não misturar tudo
+    # numa lista só e confundir o usuário. Escolher um funcionário, uma
+    # data, ou "Mostrar dias anteriores" tira essa restrição.
+    somente_hoje = (
+        not mostrar_todos
+        and funcionario_id_filtro is None
+        and not data_inicio
+        and not data_fim
+    )
+    if somente_hoje:
+        query = query.where(Pagamento.data == date.today())
+    else:
+        if funcionario_id_filtro:
+            query = query.where(Pagamento.funcionario_id == funcionario_id_filtro)
+        if data_inicio:
+            query = query.where(Pagamento.data >= date.fromisoformat(data_inicio))
+        if data_fim:
+            query = query.where(Pagamento.data <= date.fromisoformat(data_fim))
     pagamentos = db.scalars(query).all()
 
     # Inclui inativos no filtro: pagamento a ex-funcionário continua no histórico.
@@ -51,6 +64,8 @@ def listar(
             "filtro_funcionario_id": funcionario_id_filtro,
             "filtro_data_inicio": data_inicio,
             "filtro_data_fim": data_fim,
+            "somente_hoje": somente_hoje,
+            "hoje": date.today(),
         },
     )
 

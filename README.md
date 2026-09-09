@@ -166,12 +166,12 @@ Endpoints implementados até agora:
 | `POST` | `/funcionarios/{id}/editar` | Salva edição |
 | `POST` | `/funcionarios/{id}/inativar` | Soft delete |
 | `POST` | `/funcionarios/{id}/ativar` | Reativa |
-| `GET` | `/pagamentos` | Histórico de pagamentos, com filtro opcional `?funcionario_id=` e `?data_inicio=&data_fim=` |
+| `GET` | `/pagamentos` | Histórico de pagamentos — só hoje por padrão; `?mostrar_todos=true`, `?funcionario_id=` ou `?data_inicio=&data_fim=` mostram outros períodos |
 | `GET` | `/pagamentos/novo` | Formulário de novo pagamento |
 | `POST` | `/pagamentos` | Registra pagamento |
 | `GET` | `/pagamentos/{id}/editar` | Formulário de edição |
 | `POST` | `/pagamentos/{id}/editar` | Salva edição |
-| `GET` | `/despesas` | Histórico de despesas, com filtro opcional `?data_inicio=&data_fim=` |
+| `GET` | `/despesas` | Histórico de despesas — só hoje por padrão; `?mostrar_todos=true` ou `?data_inicio=&data_fim=` mostram outros períodos |
 | `GET` | `/despesas/novo` | Formulário de nova despesa |
 | `POST` | `/despesas` | Registra despesa |
 | `GET` | `/despesas/{id}/editar` | Formulário de edição |

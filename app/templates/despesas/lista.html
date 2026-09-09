@@ -8,6 +8,16 @@
         <a href="/despesas/novo" class="btn btn-primary">Nova despesa</a>
     </div>
 
+    <p>
+        {% if somente_hoje %}
+            Mostrando só hoje ({{ hoje.strftime("%d/%m/%Y") }}).
+            <a href="/despesas?mostrar_todos=true">Mostrar dias anteriores também</a>
+        {% else %}
+            Mostrando todos os períodos.
+            <a href="/despesas">Mostrar só hoje</a>
+        {% endif %}
+    </p>
+
     <form method="get" action="/despesas" class="row g-2 mb-4 align-items-end">
         <div class="col-auto">
             <label for="data_inicio" class="form-label">De</label>
@@ -53,7 +63,9 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" class="text-muted">Nenhuma despesa encontrada.</td>
+                <td colspan="8" class="text-muted">
+                    {% if somente_hoje %}Nenhuma despesa registrada hoje.{% else %}Nenhuma despesa encontrada.{% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>

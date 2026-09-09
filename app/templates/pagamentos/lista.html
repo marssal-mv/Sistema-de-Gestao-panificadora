@@ -8,6 +8,16 @@
         <a href="/pagamentos/novo" class="btn btn-primary">Novo pagamento</a>
     </div>
 
+    <p>
+        {% if somente_hoje %}
+            Mostrando só hoje ({{ hoje.strftime("%d/%m/%Y") }}).
+            <a href="/pagamentos?mostrar_todos=true">Mostrar dias anteriores também</a>
+        {% else %}
+            Mostrando todos os períodos.
+            <a href="/pagamentos">Mostrar só hoje</a>
+        {% endif %}
+    </p>
+
     <form method="get" action="/pagamentos" class="row g-2 mb-4 align-items-end">
         <div class="col-auto">
             <label for="funcionario_id" class="form-label">Funcionário</label>
@@ -63,7 +73,9 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="6" class="text-muted">Nenhum pagamento encontrado.</td>
+                <td colspan="6" class="text-muted">
+                    {% if somente_hoje %}Nenhum pagamento registrado hoje.{% else %}Nenhum pagamento encontrado.{% endif %}
+                </td>
             </tr>
             {% endfor %}
         </tbody>
