@@ -36,8 +36,9 @@
                     {% if saldo_estimado is not none %}
                         <p class="fs-4 mb-0">R$ {{ "%.2f"|format(saldo_estimado) }}</p>
                         <p class="small text-muted mb-0">
-                            Não inclui vendas do dia — o sistema ainda não registra vendas.
-                            Use pra conferir contra a contagem física do caixa.
+                            Desde o fechamento de {{ ultimo_fechamento.data.strftime("%d/%m") }}
+                            ({{ ultimo_fechamento.turno }}). Não inclui vendas — o sistema ainda
+                            não registra vendas. Use pra conferir contra a contagem física.
                         </p>
                     {% else %}
                         <p class="text-muted mb-0">
