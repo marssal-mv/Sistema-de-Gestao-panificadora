@@ -234,10 +234,12 @@ seção 8).
 - **Só Dinheiro afeta o caixa físico.** Pagamentos e despesas em Pix são
   saída real de dinheiro da padaria, mas não mexem no saldo físico do
   caixa — por isso o dashboard separa "Saídas em Dinheiro" do total geral.
-- **O caixa sempre abre com o troco que sobrou do fechamento anterior**
+- **O caixa sempre abre com o que sobrou do fechamento anterior**
   (confirmado com o dono da padaria — não existe um fundo fixo definido à
-  parte). O dashboard usa `cedulas_troco` do fechamento mais recente
-  (`FechamentoCaixa`) como "Fundo de caixa".
+  parte). O dashboard usa o `.total` (`cedulas_troco + cedulas_inteiro`)
+  do fechamento mais recente (`FechamentoCaixa`) como "Fundo de caixa" —
+  as duas categorias de cédula servem pra dar troco, não só
+  `cedulas_troco` sozinha.
 - **Fechamento de caixa é feito 2x por dia** (manhã e noite) — não uma
   vez, como o MVP original supôs. O desempate de "fechamento mais
   recente" no dashboard usa o turno em si (Noite > Manhã via `CASE` no

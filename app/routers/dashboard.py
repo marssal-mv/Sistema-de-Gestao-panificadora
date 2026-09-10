@@ -33,10 +33,13 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     # Regra de negócio (CLAUDE.md seção 4): só Dinheiro afeta o caixa físico.
     saidas_dinheiro_hoje = saidas_por_forma.get("Dinheiro", Decimal("0"))
 
-    # Fundo de caixa = cédulas de troco do fechamento mais recente (hoje ou
-    # de um dia anterior). Desempate por turno (Noite > Manhã) e por
-    # criado_em, não pela ordem em que foram cadastrados — importante pra
-    # não pegar o fechamento errado se um dia ele lançar fora de ordem.
+    # Fundo de caixa = cédulas troco + cédulas inteiro do fechamento mais
+    # recente (hoje ou de um dia anterior) — as duas categorias servem pra
+    # dar troco (confirmado com o dono da padaria; a suposição inicial, de
+    # que só "troco" contava, veio de uma leitura errada dos cadernos).
+    # Desempate por turno (Noite > Manhã) e por criado_em, não pela ordem
+    # em que foram cadastrados — importante pra não pegar o fechamento
+    # errado se um dia ele lançar fora de ordem.
     #
     # Não existe mais um "saldo estimado do caixa" aqui: sem registro de
     # vendas, essa conta (fundo − saídas) só cresce negativa ao longo do
@@ -51,7 +54,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
         )
         .limit(1)
     )
-    fundo_inicial = ultimo_fechamento.cedulas_troco if ultimo_fechamento else None
+    fundo_inicial = ultimo_fechamento.total if ultimo_fechamento else None
 
     return templates.TemplateResponse(
         request,
