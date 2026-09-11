@@ -12,10 +12,25 @@ from app.templating import templates
 
 router = APIRouter(tags=["dashboard"])
 
+# Nome do dia da semana em português, indexado por date.weekday()
+# (segunda=0 ... domingo=6). Não usamos strftime("%A") porque depende do
+# locale do sistema operacional estar em pt-BR, o que não é garantido
+# (já tivemos problema parecido com formato de data no navegador).
+DIAS_SEMANA = [
+    "segunda-feira",
+    "terça-feira",
+    "quarta-feira",
+    "quinta-feira",
+    "sexta-feira",
+    "sábado",
+    "domingo",
+]
+
 
 @router.get("/")
 def dashboard(request: Request, db: Session = Depends(get_db)):
     hoje = date.today()
+    dia_semana = DIAS_SEMANA[hoje.weekday()]
 
     pagamentos_hoje = db.scalars(select(Pagamento).where(Pagamento.data == hoje)).all()
     despesas_hoje = db.scalars(select(Despesa).where(Despesa.data == hoje)).all()
@@ -67,6 +82,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
         "dashboard.html",
         {
             "hoje": hoje,
+            "dia_semana": dia_semana,
             "saidas_por_forma": dict(saidas_por_forma),
             "total_saidas_hoje": total_saidas_hoje,
             "ultimo_fechamento": ultimo_fechamento,
