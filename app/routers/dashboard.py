@@ -33,6 +33,12 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
     # Regra de negócio (CLAUDE.md seção 4): só Dinheiro afeta o caixa físico.
     saidas_dinheiro_hoje = saidas_por_forma.get("Dinheiro", Decimal("0"))
 
+    # Totais separados por origem (Pagamento x Despesa), somando todas as
+    # formas de pagamento juntas — diferente de saidas_por_forma, que
+    # junta as duas origens mas separa por forma de pagamento.
+    total_pagamentos_hoje = sum((p.valor for p in pagamentos_hoje), Decimal("0"))
+    total_despesas_hoje = sum((d.valor for d in despesas_hoje), Decimal("0"))
+
     # Fundo de caixa = cédulas troco + cédulas inteiro do fechamento mais
     # recente (hoje ou de um dia anterior) — as duas categorias servem pra
     # dar troco (confirmado com o dono da padaria; a suposição inicial, de
@@ -66,5 +72,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
             "ultimo_fechamento": ultimo_fechamento,
             "fundo_inicial": fundo_inicial,
             "saidas_dinheiro_hoje": saidas_dinheiro_hoje,
+            "total_pagamentos_hoje": total_pagamentos_hoje,
+            "total_despesas_hoje": total_despesas_hoje,
         },
     )

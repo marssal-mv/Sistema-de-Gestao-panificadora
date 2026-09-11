@@ -6,7 +6,7 @@
     <h1 class="mb-4">Dashboard — {{ hoje.strftime("%d/%m/%Y") }}</h1>
 
     <div class="row g-3 mb-4">
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100">
                 <div class="card-body">
                     <h2 class="h6 text-muted">Fundo de caixa</h2>
@@ -21,11 +21,29 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 col-lg-3">
             <div class="card h-100">
                 <div class="card-body">
                     <h2 class="h6 text-muted">Saídas em Dinheiro hoje</h2>
                     <p class="fs-4 mb-0">R$ {{ "%.2f"|format(saidas_dinheiro_hoje) }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Pagamentos hoje</h2>
+                    <p class="fs-4 mb-0">R$ {{ "%.2f"|format(total_pagamentos_hoje) }}</p>
+                    <p class="small text-muted mb-0">Todas as formas de pagamento</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h2 class="h6 text-muted">Despesas hoje</h2>
+                    <p class="fs-4 mb-0">R$ {{ "%.2f"|format(total_despesas_hoje) }}</p>
+                    <p class="small text-muted mb-0">Todas as formas de pagamento</p>
                 </div>
             </div>
         </div>

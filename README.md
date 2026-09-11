@@ -196,7 +196,7 @@ Endpoints implementados até agora:
 | `GET` | `/login` | Formulário de login (pública) |
 | `POST` | `/login` | Autentica e cria a sessão (pública) |
 | `POST` | `/logout` | Encerra a sessão |
-| `GET` | `/` | Dashboard: fundo de caixa (último fechamento) + saídas de hoje por forma de pagamento |
+| `GET` | `/` | Dashboard: fundo de caixa, saídas em Dinheiro hoje, total de Pagamentos hoje, total de Despesas hoje, e saídas de hoje por forma de pagamento |
 | `GET` | `/healthz` | Health check simples, `{"status": "ok"}` (pública) |
 | `GET` | `/funcionarios` | Lista funcionários (só ativos por padrão; `?mostrar_inativos=true` mostra todos) |
 | `GET` | `/funcionarios/novo` | Formulário de cadastro |
