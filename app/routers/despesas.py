@@ -67,8 +67,6 @@ def form_novo(request: Request, db: Session = Depends(get_db)):
 def criar(
     request: Request,
     descricao: str = Form(...),
-    fornecedor: str = Form(""),
-    categoria: str = Form(""),
     forma_pagamento_id: int = Form(...),
     valor: str = Form(...),
     data: str = Form(...),
@@ -114,8 +112,6 @@ def criar(
                 "erro": erro,
                 "valores": {
                     "descricao": descricao,
-                    "fornecedor": fornecedor,
-                    "categoria": categoria,
                     "forma_pagamento_id": forma_pagamento_id,
                     "valor": valor,
                     "data": data,
@@ -127,8 +123,6 @@ def criar(
 
     despesa = Despesa(
         descricao=descricao,
-        fornecedor=fornecedor.strip() or None,
-        categoria=categoria.strip() or None,
         forma_pagamento_id=forma_pagamento_id,
         valor=valor_decimal,
         data=data_valor,
@@ -161,8 +155,6 @@ def form_editar(despesa_id: int, request: Request, db: Session = Depends(get_db)
             "formas_pagamento": formas_pagamento,
             "valores": {
                 "descricao": despesa.descricao,
-                "fornecedor": despesa.fornecedor,
-                "categoria": despesa.categoria,
                 "forma_pagamento_id": despesa.forma_pagamento_id,
                 "valor": str(despesa.valor),
                 "data": despesa.data.isoformat(),
@@ -177,8 +169,6 @@ def editar(
     despesa_id: int,
     request: Request,
     descricao: str = Form(...),
-    fornecedor: str = Form(""),
-    categoria: str = Form(""),
     forma_pagamento_id: int = Form(...),
     valor: str = Form(...),
     data: str = Form(...),
@@ -230,8 +220,6 @@ def editar(
                 "erro": erro,
                 "valores": {
                     "descricao": descricao,
-                    "fornecedor": fornecedor,
-                    "categoria": categoria,
                     "forma_pagamento_id": forma_pagamento_id,
                     "valor": valor,
                     "data": data,
@@ -243,8 +231,9 @@ def editar(
 
     valor_antigo = despesa.valor
     despesa.descricao = descricao
-    despesa.fornecedor = fornecedor.strip() or None
-    despesa.categoria = categoria.strip() or None
+    # fornecedor/categoria não são mais editáveis por aqui — quem já tinha
+    # valor preenchido (ex: id=2 "Rosivan") mantém intacto no banco, só não
+    # aparece mais na tela nem pode ser alterado por essa rota.
     despesa.forma_pagamento_id = forma_pagamento_id
     despesa.valor = valor_decimal
     despesa.data = data_valor

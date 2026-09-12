@@ -28,28 +28,6 @@
         </div>
 
         <div class="mb-3">
-            <label for="fornecedor" class="form-label">Fornecedor (opcional)</label>
-            <input
-                type="text"
-                class="form-control"
-                id="fornecedor"
-                name="fornecedor"
-                value="{{ valores.fornecedor or '' }}"
-            >
-        </div>
-
-        <div class="mb-3">
-            <label for="categoria" class="form-label">Categoria (opcional)</label>
-            <input
-                type="text"
-                class="form-control"
-                id="categoria"
-                name="categoria"
-                value="{{ valores.categoria or '' }}"
-            >
-        </div>
-
-        <div class="mb-3">
             <label for="forma_pagamento_id" class="form-label">Forma de pagamento</label>
             <select name="forma_pagamento_id" id="forma_pagamento_id" class="form-select" required>
                 <option value="" disabled {% if not valores.forma_pagamento_id %}selected{% endif %}>Selecione...</option>

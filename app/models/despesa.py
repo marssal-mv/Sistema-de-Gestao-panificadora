@@ -15,10 +15,11 @@ class Despesa(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     descricao: Mapped[str] = mapped_column(String(200), nullable=False)
-    # Texto livre por enquanto (ex: "Rosivan"). Se um dia precisarmos de
-    # relatórios por fornecedor, migramos isso para uma tabela própria.
+    # Removidos das telas em 12/09/2026 (não fazia diferença real no uso do
+    # dia a dia) — colunas mantidas só pra não perder o histórico de quem
+    # já tinha (ex: id=2, fornecedor="Rosivan"). Não são mais lidos nem
+    # escritos por nenhuma rota.
     fornecedor: Mapped[str | None] = mapped_column(String(120), nullable=True)
-    # Opcional: o pai não categoriza no caderno, então não obrigamos aqui.
     categoria: Mapped[str | None] = mapped_column(String(60), nullable=True)
     forma_pagamento_id: Mapped[int] = mapped_column(ForeignKey("formas_pagamento.id"), nullable=False)
     valor: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)

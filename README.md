@@ -168,9 +168,11 @@ via migration). Schema completo comentado em `CLAUDE.md` seção 6; resumo:
 - **`pagamentos`** — pagamento a um funcionário. `funcionario_id` → FK pra
   `funcionarios`, `forma_pagamento_id` → FK pra `formas_pagamento`. Valor
   sempre `> 0` (constraint no banco).
-- **`despesas`** — gasto da padaria (compras, fornecedores). Independente,
-  sem FK pra outras tabelas do domínio. `fornecedor` é texto livre
-  (proposital — só vira tabela própria se/quando fizer sentido).
+- **`despesas`** — gasto da padaria (descrição, valor, forma de
+  pagamento, data, observação). Independente, sem FK pra outras tabelas
+  do domínio. Colunas `fornecedor`/`categoria` existem no banco mas não
+  são mais usadas pelas telas (removidas em 12/09/2026 — texto livre
+  demais pra ser útil no uso real).
 - **`fechamentos_caixa`** — dois por dia (`turno`: `Manhã` ou `Noite`,
   `CHECK` constraint; `UNIQUE(data, turno)` — um fechamento por turno
   por dia, não um por dia). `total` não é uma coluna: é sempre
@@ -250,8 +252,11 @@ seção 8).
   saídas" só cresce negativo ao longo do dia, já que nunca soma o
   dinheiro que entra. Métrica reintroduzível só se/quando o sistema
   passar a registrar vendas.
-- **Categoria de despesa é sempre opcional**, nunca obrigatória — o pai não
-  categoriza gastos mentalmente, só anota "nome + valor".
+- **Fornecedor e categoria de despesa foram removidos das telas**
+  (12/09/2026) — não faziam diferença real no uso do dia a dia (o pai não
+  categoriza gastos mentalmente, só anota "nome + valor"). As colunas
+  continuam no banco (nullable, sem uso) só pra não perder histórico de
+  quem já tinha valor preenchido.
 - **Import de modelos sempre via pacote:** `from app.models import X`,
   nunca `from app.models.NOME import X` direto. Os relacionamentos entre
   tabelas são resolvidos pelo SQLAlchemy por nome de classe (string), e

@@ -39,8 +39,6 @@
             <tr>
                 <th>Data</th>
                 <th>Descrição</th>
-                <th>Fornecedor</th>
-                <th>Categoria</th>
                 <th>Forma</th>
                 <th class="text-end">Valor</th>
                 <th>Observação</th>
@@ -52,8 +50,6 @@
             <tr>
                 <td>{{ despesa.data.strftime("%d/%m/%Y") }}</td>
                 <td>{{ despesa.descricao }}</td>
-                <td>{{ despesa.fornecedor or "" }}</td>
-                <td>{{ despesa.categoria or "" }}</td>
                 <td>{{ despesa.forma_pagamento.nome }}</td>
                 <td class="text-end">R$ {{ "%.2f"|format(despesa.valor) }}</td>
                 <td>{{ despesa.observacao or "" }}</td>
@@ -63,7 +59,7 @@
             </tr>
             {% else %}
             <tr>
-                <td colspan="8" class="text-muted">
+                <td colspan="6" class="text-muted">
                     {% if somente_hoje %}Nenhuma despesa registrada hoje.{% else %}Nenhuma despesa encontrada.{% endif %}
                 </td>
             </tr>
