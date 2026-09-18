@@ -45,7 +45,7 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
         saidas_por_forma[despesa.forma_pagamento.nome] += despesa.valor
 
     total_saidas_hoje = sum(saidas_por_forma.values(), Decimal("0"))
-    # Regra de negócio (CLAUDE.md seção 4): só Dinheiro afeta o caixa físico.
+    # Regra de negócio: só Dinheiro afeta o caixa físico.
     saidas_dinheiro_hoje = saidas_por_forma.get("Dinheiro", Decimal("0"))
 
     # Totais separados por origem (Pagamento x Despesa), somando todas as

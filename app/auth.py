@@ -1,7 +1,7 @@
 """
 Funções de autenticação: hash/verificação de senha (bcrypt puro, sem
 passlib — passlib está sem manutenção desde 2020 e quebra com versões
-recentes do bcrypt, ver CLAUDE.md) e leitura do usuário logado a partir
+recentes do bcrypt) e leitura do usuário logado a partir
 da sessão (cookie assinado, via SessionMiddleware do Starlette).
 """
 

@@ -1,8 +1,7 @@
 # Sistema Pra Padaria — Panificadora Rosa de Saron
 
 Sistema de gestão para substituir os cadernos de controle manual da padaria da
-família. Contexto completo do levantamento de requisitos e decisões de
-arquitetura está no [`CLAUDE.md`](CLAUDE.md).
+família.
 
 ## Objetivo e funcionamento geral
 
@@ -32,8 +31,7 @@ dados quanto o HTML já pronto (sem frontend separado, sem API JSON pública).
 
 Por que monolito e não API + frontend separados: um único usuário (o pai),
 sem necessidade de app mobile por enquanto — separar traria complexidade
-(CORS, dois deploys) sem benefício real agora. Justificativas completas de
-cada escolha de arquitetura estão no `CLAUDE.md`, seção 5.
+(CORS, dois deploys) sem benefício real agora.
 
 ## Estrutura de pastas
 
@@ -79,8 +77,7 @@ que cada uma faz no projeto:
 | `itsdangerous` | assina o cookie de sessão do login (`SessionMiddleware` do Starlette) |
 
 **Nota de compatibilidade:** o projeto roda em Python 3.14 (recente).
-Três dependências precisaram de ajuste por causa disso — ver `CLAUDE.md`
-seção 7 e a entrada de 09/09/2026 pro histórico completo: troca de
+Três dependências precisaram de ajuste por causa disso: troca de
 `psycopg2-binary` por `psycopg[binary]`, `sqlalchemy` fixado em `2.0.52`
 por um bug de tipagem, e `passlib` removido em favor do `bcrypt` puro
 (passlib está sem manutenção desde 2020 e quebra com versões recentes
@@ -158,7 +155,7 @@ nada de sessão guardado no banco, é tudo no próprio cookie, assinado com a
 ## Banco de dados: entidades e relacionamentos
 
 6 tabelas, criadas via Alembic (não editar o schema direto no banco — sempre
-via migration). Schema completo comentado em `CLAUDE.md` seção 6; resumo:
+via migration). Resumo:
 
 - **`funcionarios`** — nome, `ativo` (soft delete: nunca é apagado de
   verdade, só marcado inativo, pra não quebrar o histórico de pagamentos).
@@ -223,8 +220,7 @@ Endpoints implementados até agora:
 | `GET` | `/fechamentos-caixa/{id}/editar` | Formulário de edição |
 | `POST` | `/fechamentos-caixa/{id}/editar` | Salva edição |
 
-Todas as fases do MVP original estão implementadas (ver `CLAUDE.md`
-seção 8).
+Todas as fases do MVP original estão implementadas.
 
 ## Regras de negócio importantes
 

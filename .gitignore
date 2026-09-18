@@ -5,6 +5,4 @@ __pycache__/
 venv/
 *.egg-info/
 .DS_Store
-.claude/
-CLAUDE.md
 logs/
